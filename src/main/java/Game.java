@@ -21,13 +21,12 @@ public class Game {
         for (var player : playerList) {
             var thread = new Thread(player);
             thread.start();
-
             try {
                 thread.join();
+                log.info("Player {} joined the game", player.getName());
             } catch (InterruptedException e) {
                 log.error("Player {} thread interrupted", player.getName());
             }
-
         }
     }
 

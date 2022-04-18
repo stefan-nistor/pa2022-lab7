@@ -1,6 +1,7 @@
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -9,7 +10,7 @@ import java.util.List;
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
-public class Player implements Runnable{
+public class Player implements Runnable {
     private String name;
     private Game game;
     private boolean running;
@@ -20,29 +21,37 @@ public class Player implements Runnable{
         this.name = name;
     }
 
-    private boolean submitWord(){
-        List<Tile> extracted = game.getBag().extractTiles(BASIC_NUM_OF_TILES);
-        if(extracted.isEmpty()){
+    private boolean submitWord() throws InterruptedException {
+        List<Tile> extracted = game.getBag().extractTiles(7);
+        if (extracted.isEmpty()) {
             return false;
         }
+        System.out.println(extracted);
 
-        var word = createWord(extracted);
+        Collections.shuffle(extracted);
+        String word = createWord(extracted);
+
         game.getBoard().addWord(this, word);
-
-        try{
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            log.error("Player {} thread interrupted", this.getName());
-        }
+        Thread.sleep(50);
         return true;
     }
 
-    private String createWord(List<Tile> extracted){
-        return "testing";
+    private String createWord(List<Tile> extracted) {
+        StringBuilder builder = new StringBuilder(extracted.size());
+        for (Tile ch : extracted) {
+            builder.append(ch.getLetter());
+        }
+        return builder.toString();
     }
 
     @Override
     public void run() {
+        setGame(game);
 
+        try {
+            while (submitWord()) ;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
